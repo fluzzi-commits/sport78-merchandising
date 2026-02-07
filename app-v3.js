@@ -195,6 +195,9 @@ const App = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
 
+  // Estados para modo móvil
+  const [activeMobileMenu, setActiveMobileMenu] = React.useState(null); // 'CATALOG' | 'ANALYTICS' | null
+
   // Debug logs
   React.useEffect(() => {
     console.log("Modo Layout cambiado:", isLayoutMode);
@@ -304,11 +307,21 @@ const App = () => {
   };
 
   return React.createElement('div', { className: 'flex h-screen w-full bg-gray-50 text-slate-800' },
-    // Sidebar
-    React.createElement('aside', { className: `w-80 lg:w-96 bg-white border-r border-gray-200 flex flex-col shadow-xl z-20 shrink-0 ${isLayoutMode ? 'opacity-50 pointer-events-none grayscale' : ''}` },
-      React.createElement('div', { className: 'p-6 border-b border-gray-100' },
-        React.createElement('h1', { className: 'text-xl font-bold flex items-center gap-2 text-indigo-700' }, '📊 Retailers Maqueta SPORT78'),
-        React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'Herramienta de Visual Merchandising')
+    // Sidebar Catálogo (Móvil: Drawer / Desktop: Fijo)
+    React.createElement('aside', {
+      className: `
+        fixed inset-y-0 left-0 z-[60] w-80 bg-white border-r border-gray-200 flex flex-col shadow-2xl transition-transform duration-300 transform
+        lg:relative lg:translate-x-0 lg:shadow-none lg:z-20 lg:shrink-0
+        ${activeMobileMenu === 'CATALOG' ? 'translate-x-0' : '-translate-x-full'}
+        ${isLayoutMode ? 'opacity-50 pointer-events-none grayscale' : ''}
+      `
+    },
+      React.createElement('div', { className: 'p-6 border-b border-gray-100 flex items-center justify-between' },
+        React.createElement('div', {},
+          React.createElement('h1', { className: 'text-lg font-bold flex items-center gap-2 text-indigo-700' }, '📊 Sport78'),
+          React.createElement('p', { className: 'text-[10px] text-gray-400 mt-0.5' }, 'Visual Merchandising')
+        ),
+        React.createElement('button', { onClick: () => setActiveMobileMenu(null), className: 'lg:hidden p-2 text-gray-400 hover:text-gray-600' }, '✕')
       ),
       // Filters
       React.createElement('div', { className: 'p-4 space-y-4' },
@@ -354,18 +367,28 @@ const App = () => {
     React.createElement('main', { className: 'flex-1 flex flex-col relative bg-slate-100/50 h-screen overflow-hidden' },
       // Toolbar
       React.createElement('header', { className: 'h-16 bg-white border-b border-gray-200 px-6 flex items-center justify-between shadow-sm z-10 shrink-0' },
-        React.createElement('div', { className: 'flex items-center gap-4' },
-          React.createElement('h2', { className: 'text-lg font-semibold text-gray-800' }, 'Plano del Local'),
+        React.createElement('div', { className: 'flex items-center gap-3' },
+          // Botones de Menú Móvil
+          React.createElement('button', {
+            onClick: () => setActiveMobileMenu('CATALOG'),
+            className: 'lg:hidden p-2 bg-indigo-50 text-indigo-700 rounded-md'
+          }, '🛍️'),
+          React.createElement('h2', { className: 'text-sm lg:text-lg font-semibold text-gray-800' }, 'Plano'),
           // Firebase Status Indicator
-          firebaseEnabled && React.createElement('div', { className: `text-xs px-2 py-1 rounded-full flex items-center gap-1 ${isSaving ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}` },
-            isSaving ? '🔄 Guardando...' : '☁️ Sincronizado'
+          firebaseEnabled && React.createElement('div', { className: `text-[10px] lg:text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${isSaving ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}` },
+            isSaving ? (window.innerWidth < 640 ? '🔄' : '🔄 Guardando...') : (window.innerWidth < 640 ? '☁️' : '☁️ Sincronizado')
           ),
-          selectedProduct && !isLayoutMode && React.createElement('div', { className: 'bg-indigo-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center' },
-            `Seleccionado: ${selectedProduct.name}`,
-            React.createElement('button', { onClick: () => setSelectedProduct(null), className: 'ml-2 hover:bg-indigo-500 rounded-full p-0.5' }, '✕')
+          selectedProduct && !isLayoutMode && React.createElement('div', { className: 'bg-indigo-600 text-white text-[10px] px-2 py-1 rounded-full flex items-center gap-1' },
+            window.innerWidth < 640 ? '📍 ' + selectedProduct.brand : `Seleccionado: ${selectedProduct.name}`,
+            React.createElement('button', { onClick: () => setSelectedProduct(null), className: 'ml-1 hover:bg-indigo-500 rounded-full p-0.5' }, '✕')
           )
         ),
-        React.createElement('div', { className: 'flex items-center gap-3' },
+        React.createElement('div', { className: 'flex items-center gap-2' },
+          // Botón Analytics Móvil
+          React.createElement('button', {
+            onClick: () => setActiveMobileMenu('ANALYTICS'),
+            className: 'lg:hidden p-2 bg-slate-50 text-slate-700 rounded-md mr-1'
+          }, '📈'),
           // Botón Agregar Sector (Visible solo en layout mode)
           isLayoutMode ? React.createElement('button', {
             onClick: () => {
@@ -386,10 +409,17 @@ const App = () => {
             React.createElement(StoreMap, { zones, products, onZoneClick: handleZoneClick, onZoneUpdate: handleUpdateZoneConfig, selectedZoneId: isLayoutMode ? editingZoneId : selectedZoneId, draggedProduct: selectedProduct, isLayoutMode })
           )
         ),
-        // Analytics Sidebar
-        React.createElement('aside', { className: 'w-72 bg-white border-l border-gray-200 flex flex-col z-10 shrink-0 overflow-y-auto' },
-          React.createElement('div', { className: 'p-4 border-b border-gray-100 bg-gray-50/50' },
-            React.createElement('h3', { className: 'font-bold text-gray-700' }, '📈 Share de Marcas')
+        // Analytics Sidebar (Móvil: Drawer / Desktop: Fijo)
+        React.createElement('aside', {
+          className: `
+            fixed inset-y-0 right-0 z-[60] w-72 bg-white border-l border-gray-200 flex flex-col shadow-2xl transition-transform duration-300 transform
+            lg:relative lg:translate-x-0 lg:shadow-none lg:z-20 lg:shrink-0
+            ${activeMobileMenu === 'ANALYTICS' ? 'translate-x-0' : 'translate-x-full'}
+          `
+        },
+          React.createElement('div', { className: 'p-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between font-bold text-gray-700' },
+            React.createElement('span', {}, '📈 Share de Marcas'),
+            React.createElement('button', { onClick: () => setActiveMobileMenu(null), className: 'lg:hidden p-1 text-gray-400' }, '✕')
           ),
           React.createElement('div', { className: 'p-4 flex-1 flex flex-col' },
             brandStats.length === 0 ? React.createElement('div', { className: 'text-center py-12 text-gray-400' }, React.createElement('p', { className: 'text-sm' }, 'Sin datos'), React.createElement('p', { className: 'text-[10px] mt-1' }, 'Coloca productos para ver métricas')) :
@@ -530,7 +560,17 @@ const App = () => {
             React.createElement('button', { onClick: () => setEditingZoneId(null), className: 'bg-orange-600 text-white px-6 py-2 rounded-md hover:bg-orange-700 text-sm font-medium' }, '✓ Listo')
           )
         )
-      )
+      ),
+      // Overlay para cerrar menús móviles
+      activeMobileMenu && React.createElement('div', {
+        onClick: () => setActiveMobileMenu(null),
+        className: 'fixed inset-0 bg-black/40 backdrop-blur-xs z-50 lg:hidden'
+      }),
+      // Botón flotante de emergencia (Visible solo en layout mode)
+      isLayoutMode && React.createElement('button', {
+        onClick: handleAddZone,
+        className: 'fixed bottom-6 right-6 lg:bottom-10 lg:right-10 bg-red-600 text-white p-3 lg:p-4 rounded-full shadow-2xl z-40 font-bold animate-bounce border-4 border-white text-xs lg:text-base'
+      }, '➕ AGREGAR AQUI'),
     )
   );
 };
