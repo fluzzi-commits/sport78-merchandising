@@ -391,16 +391,18 @@ const App = () => {
             <h1 className='text-xl font-bold text-indigo-700 flex items-center gap-2'><Icon name='LayoutGrid' size={24} /> Sport78</h1>
             <p className='text-xs text-gray-500'>Visual Merchandising</p>
           </div>
-          <div className='flex gap-2'>
-            <label className='cursor-pointer p-2 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-colors border border-indigo-200' title='Subir Fotos (Nombre = SKU)'>
-              <Icon name='Image' size={20} />
+          <div className='flex gap-2 items-center'>
+            <label className='flex items-center gap-1 cursor-pointer px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-all shadow-md font-bold text-[10px]' title='Subir Fotos (Nombre = SKU)'>
+              <Icon name='Image' size={14} />
+              <span>FOTOS</span>
               <input type='file' className='hidden' accept='image/*' multiple onChange={handleImageUpload} />
             </label>
-            <label className='cursor-pointer p-2 bg-slate-50 text-slate-600 rounded-full hover:bg-slate-100 transition-colors border border-slate-200' title='Subir Excel'>
-              <Icon name='Upload' size={20} />
+            <label className='flex items-center gap-1 cursor-pointer px-3 py-1.5 bg-slate-700 text-white rounded-md hover:bg-slate-800 transition-all shadow-md font-bold text-[10px]' title='Subir Excel'>
+              <Icon name='Upload' size={14} />
+              <span>EXCEL</span>
               <input type='file' className='hidden' accept='.xlsx, .xls, .csv' onChange={handleExcelUpload} />
             </label>
-            <button onClick={() => setActiveMobileMenu(null)} className='lg:hidden p-2 text-gray-400'><Icon name='X' size={20} /></button>
+            <button onClick={() => setActiveMobileMenu(null)} className='lg:hidden p-1 text-gray-400'><Icon name='X' size={20} /></button>
           </div>
         </div>
         {/* Filters */}
