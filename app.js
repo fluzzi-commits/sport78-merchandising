@@ -344,6 +344,39 @@ const App = () => {
   };
   const handleDeleteZone = (zoneId) => { if (confirm('¿Eliminar esta zona?')) { setZones(prev => prev.filter(z => z.id !== zoneId)); setEditingZoneId(null); } };
 
+  const handleImageUpload = (e) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    let updatedCount = 0;
+    const fileList = Array.from(files);
+
+    fileList.forEach(file => {
+      const skuFromFile = file.name.split('.')[0];
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const dataUrl = evt.target?.result;
+        if (dataUrl) {
+          setProducts(prev => prev.map(p => {
+            if (p.sku === skuFromFile) {
+              updatedCount++;
+              return { ...p, imageUrl: dataUrl };
+            }
+            return p;
+          }));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    setTimeout(() => {
+      if (updatedCount > 0) { alert(`Se han actualizado ${updatedCount} fotos.`); }
+      else { alert("No se encontraron coincidencias de SKU."); }
+    }, 500);
+
+    e.target.value = '';
+  };
+
   return (
     <div className='flex h-screen w-full bg-gray-50 text-slate-800'>
       {/* Sidebar Catálogo */}
@@ -354,6 +387,10 @@ const App = () => {
             <p className='text-xs text-gray-500'>Visual Merchandising</p>
           </div>
           <div className='flex gap-2'>
+            <label className='cursor-pointer p-2 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors' title='Subir Fotos (Nombre = SKU)'>
+              <Icon name='ImageIcon' size={20} />
+              <input type='file' className='hidden' accept='image/*' multiple onChange={handleImageUpload} />
+            </label>
             <label className='cursor-pointer p-2 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors' title='Subir Excel'>
               <Icon name='Upload' size={20} />
               <input type='file' className='hidden' accept='.xlsx, .xls, .csv' onChange={handleExcelUpload} />
