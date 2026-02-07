@@ -102,13 +102,18 @@ const CHART_COLORS = ['#4f46e5', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8
 const Icon = ({ name, size = 16, className = '' }) => {
   const ref = React.useRef(null);
   React.useEffect(() => {
-    if (ref.current && lucide[name]) {
+    const iconData = lucide[name] || (lucide.icons && lucide.icons[name]);
+    if (ref.current && iconData) {
       ref.current.innerHTML = '';
-      const icon = lucide.createElement(lucide[name]);
+      const icon = lucide.createElement(iconData);
       icon.setAttribute('width', size);
       icon.setAttribute('height', size);
       if (className) icon.setAttribute('class', className);
       ref.current.appendChild(icon);
+    } else if (ref.current) {
+      console.warn(`Icono no encontrado: ${name}`);
+      // Fallback simple si el icono no carga
+      ref.current.innerHTML = '📷';
     }
   }, [name, size, className]);
   return <span ref={ref} className={`inline-flex items-center justify-center ${className}`}></span>;
@@ -387,11 +392,11 @@ const App = () => {
             <p className='text-xs text-gray-500'>Visual Merchandising</p>
           </div>
           <div className='flex gap-2'>
-            <label className='cursor-pointer p-2 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors' title='Subir Fotos (Nombre = SKU)'>
-              <Icon name='ImageIcon' size={20} />
+            <label className='cursor-pointer p-2 bg-indigo-50 text-indigo-600 rounded-full hover:bg-indigo-100 transition-colors border border-indigo-200' title='Subir Fotos (Nombre = SKU)'>
+              <Icon name='Image' size={20} />
               <input type='file' className='hidden' accept='image/*' multiple onChange={handleImageUpload} />
             </label>
-            <label className='cursor-pointer p-2 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors' title='Subir Excel'>
+            <label className='cursor-pointer p-2 bg-slate-50 text-slate-600 rounded-full hover:bg-slate-100 transition-colors border border-slate-200' title='Subir Excel'>
               <Icon name='Upload' size={20} />
               <input type='file' className='hidden' accept='.xlsx, .xls, .csv' onChange={handleExcelUpload} />
             </label>
